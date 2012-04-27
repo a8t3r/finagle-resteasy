@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.opower</groupId>
+    <artifactId>finagle-resteasy</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>com.positiveenergyusa</groupId>
+        <artifactId>pose-parent</artifactId>
+        <version>2.0.10</version>
+    </parent>
+
+    <dependencies>
+
+        <!--
+            TODO either:
+            - create our own finagle libs that work with Scala 2.9.1 (might just be a recompile); or,
+            - find someone else's
+         -->
+
+        <!--
+            Hard-won experience: before I started excluded the util artifact, I would get
+            numerous extremely cryptic errors related to Scala methods not being implemented,
+            or IncompatibleClassChangeErrors.
+         -->
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>finagle</artifactId>
+            <version>3.0.0</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.twitter</groupId>
+                    <artifactId>util</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+            More fun scala stuff: we specify 2.9.1 in pose-parent, but when I go with that,
+            the Java compiler starts bitching about methods not being implemented in my
+            subclass of com.twitter.finagle.Service in RestEasyUtils.  The finagle libs
+            use 2.8.1, so we'll make sure that gets pulled it.
+         -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opower</groupId>
+            <artifactId>libs-rest</artifactId>
+            <version>1.0.11</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
