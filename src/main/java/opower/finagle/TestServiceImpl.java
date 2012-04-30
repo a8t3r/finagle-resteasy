@@ -1,10 +1,7 @@
 package opower.finagle;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,18 +13,14 @@ import java.util.UUID;
  * @author ed.peters
  */
 @Path("/foo")
-public class TestRestEasyService {
+public class TestServiceImpl implements TestService {
 
-    @GET
-    @Path("/m1")
-    @Produces(MediaType.WILDCARD)
+    @Override
     public String method1() {
         return UUID.randomUUID().toString();
     }
 
-    @GET
-    @Path("/m2")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Override
     public List<String> method2() {
         return Arrays.asList(
                 UUID.randomUUID().toString(),
@@ -36,9 +29,7 @@ public class TestRestEasyService {
         );
     }
 
-    @GET
-    @Path("/m3/{str}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Override
     public List<String> method2(@PathParam("str") String str) {
         return Arrays.asList(
                 str,

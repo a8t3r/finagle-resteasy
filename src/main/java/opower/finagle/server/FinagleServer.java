@@ -4,8 +4,9 @@ import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.http.Http;
 
-import opower.finagle.TestRestEasyService;
-import opower.finagle.http.RestEasyUtils;
+import opower.finagle.TestServiceImpl;
+import opower.finagle.resteasy.RestEasyServiceBuilder;
+import opower.finagle.resteasy.RestEasyUtils;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
@@ -17,9 +18,6 @@ import java.net.InetSocketAddress;
  * Simple server class that does the following:
  *
  * <ol>
- *
- *     <li>Initializes RestEASY infrastructure, including all known <code>@Provider</code>
- *     instances for handling different types of content.</li>
  *
  *     <li>Creates a Finagle Service for handling REST requests.</li>
  *
@@ -38,12 +36,10 @@ public final class FinagleServer {
 
     public static void main(String [] args) throws Exception {
 
-        // set up rest easy plumbing & add our test service
-        Dispatcher dispatcher = RestEasyUtils.createDispatcher();
-        dispatcher.getRegistry().addSingletonResource(new TestRestEasyService());
-
         // this is what Netty is going to serve up for us
-        Service<HttpRequest,HttpResponse> service = RestEasyUtils.createDispatcherService(dispatcher);
+        Service<HttpRequest,HttpResponse> service = new RestEasyServiceBuilder()
+                .withEndpoint(new TestServiceImpl())
+                .build();
 
         // and here we go!
         ServerBuilder.safeBuild(service, ServerBuilder.get()

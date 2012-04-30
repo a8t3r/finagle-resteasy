@@ -1,12 +1,15 @@
-package opower.finagle.http;
+package opower.finagle.resteasy;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.resteasy.spi.AsynchronousResponse;
 import org.jboss.resteasy.util.Encode;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
@@ -14,39 +17,47 @@ import java.util.Map;
 
 /**
  * Wraps Finagle's Netty HTTP request to provide the semantics of the JBoss RestEASY library.
- * The majority of this is just translating data from one form to another.  Notes:
+ * The majority of this is just translating data from one form to another.
  *
- * <ul>
- *
- *     <li>JBoss includes special methods for dealing with JAX-RS <code>@FormParam</code>
- *     parameters.  I'm leaving this unimplemented because we don't use form parameters.
- *     At some point we might want to revisit this.</li>
- *
- *     <li>RestEASY has support for asynchronous methods.  It might be interesting to
- *     explore this, since Netty is pretty well set up to take advantage of efficiencies
- *     of asynchronous processing.</li>
- *
- * </ul>
- *
- * @see org.jboss.resteasy.spi.HttpRequest#getFormParameters()
- * @see "http://bill.burkecentral.com/2008/10/09/jax-rs-asynch-http/"
+ * TODO implement @FormParam support (if we care): @see org.jboss.resteasy.spi.HttpRequest#getFormParameters()
+ * TODO implement hooks for asynchronous processing: "http://bill.burkecentral.com/2008/10/09/jax-rs-asynch-http/"
  *
  * @author ed.peters
  */
-public class RestEasyRequest implements org.jboss.resteasy.spi.HttpRequest {
+public class NettyRequestWrapper implements org.jboss.resteasy.spi.HttpRequest {
 
-    private final org.jboss.netty.handler.codec.http.HttpRequest finagleRequest;
+    /** HTTP header: content type negotiation */
+    public static final String ACCEPT_HEADER = "accept";
+
+    /** HTTP header: language negotiation */
+    public static final String ACCEPT_LANGUAGE_HEADER = "accept-language";
+
+    /** HTTP header: content type output */
+    public static final String CONTENT_TYPE_HEADER = "content-type";
+
+    /** Converts Strings to MediaTypes */
+    public static final Function<String,MediaType> TO_MEDIA_TYPE = new Function<String, MediaType>() {
+        @Override
+        public MediaType apply(@Nullable String input) {
+            return input == null ? null : MediaType.valueOf(input);
+        }
+    };
+
+    private final org.jboss.netty.handler.codec.http.HttpRequest nettyRequest;
     private final Map<String,Object> attributeMap;
     private final HttpHeaders jaxrsHeaders;
     private final UriInfo jaxrsUriInfo;
     private InputStream overrideStream;
+    private InputStream underlyingStream;
     private String preProcessedPath;
 
-    public RestEasyRequest(HttpRequest finagleRequest) {
-        this.finagleRequest = finagleRequest;
-        this.jaxrsHeaders = RestEasyUtils.toHeaders(RestEasyUtils.toMultimap(finagleRequest));
-        this.jaxrsUriInfo = RestEasyUtils.extractUriInfo(finagleRequest.getUri());
+    public NettyRequestWrapper(HttpRequest nettyRequest) {
+        this.nettyRequest = nettyRequest;
+        this.jaxrsHeaders = RestEasyUtils.toHeaders(RestEasyUtils.getHeadersAsMultimap(nettyRequest));
+        this.jaxrsUriInfo = RestEasyUtils.extractUriInfo(nettyRequest.getUri());
         this.attributeMap = Maps.newHashMap();
+        this.overrideStream = null;
+        this.underlyingStream = new ChannelBufferInputStream(nettyRequest.getContent());
     }
 
     // ===================================================================
@@ -74,7 +85,7 @@ public class RestEasyRequest implements org.jboss.resteasy.spi.HttpRequest {
 
     @Override
     public String getHttpMethod() {
-        return this.finagleRequest.getMethod().getName();
+        return this.nettyRequest.getMethod().getName();
     }
 
     @Override
@@ -88,11 +99,9 @@ public class RestEasyRequest implements org.jboss.resteasy.spi.HttpRequest {
 
     @Override
     public InputStream getInputStream() {
-        // this is the same way RestEASY implements this on top of HttpServletRequests
-        if (this.overrideStream != null) {
-            return this.overrideStream;
-        }
-        return new ChannelBufferInputStream(this.finagleRequest.getContent());
+        // this is the same way RestEASY implements this on top of HttpServletRequests: as a
+        // temporary override of the underlying input stream
+        return this.overrideStream == null ? this.underlyingStream : this.overrideStream;
     }
 
     @Override
