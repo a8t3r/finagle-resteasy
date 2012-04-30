@@ -6,11 +6,9 @@ import com.twitter.finagle.http.Http;
 
 import opower.finagle.TestServiceImpl;
 import opower.finagle.resteasy.RestEasyServiceBuilder;
-import opower.finagle.resteasy.RestEasyUtils;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.resteasy.core.Dispatcher;
 
 import java.net.InetSocketAddress;
 

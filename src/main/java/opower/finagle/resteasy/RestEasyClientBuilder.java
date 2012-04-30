@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 /**
  * Knows how to build a RestEASY client.
  *
+ * @param <T> no fucking clue.  ed?
  * @author ed.peters
  */
 public class RestEasyClientBuilder<T> {

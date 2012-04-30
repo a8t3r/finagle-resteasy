@@ -37,6 +37,7 @@ import java.util.List;
  * @author ed.peters
  */
 public final class RestEasyUtils {
+    private RestEasyUtils() {}
 
     /**
      * @return the headers from the supplied Netty message, as a JAX-RS {@link MultivaluedMap}
@@ -60,7 +61,8 @@ public final class RestEasyUtils {
         impl.setMediaType(NettyRequestWrapper.TO_MEDIA_TYPE.apply(map.getFirst(NettyRequestWrapper.CONTENT_TYPE_HEADER)));
         if (map.containsKey(NettyRequestWrapper.ACCEPT_HEADER)) {
             // defensive copy because resteasy will modify this list if we're using filename extensions
-            List<MediaType> mediaTypes = Lists.transform(map.get(NettyRequestWrapper.ACCEPT_HEADER), NettyRequestWrapper.TO_MEDIA_TYPE);
+            List<MediaType> mediaTypes = Lists.transform(map.get(NettyRequestWrapper.ACCEPT_HEADER),
+                    NettyRequestWrapper.TO_MEDIA_TYPE);
             mediaTypes = Lists.newArrayList(mediaTypes);
             impl.setAcceptableMediaTypes(mediaTypes);
         }
@@ -178,13 +180,14 @@ public final class RestEasyUtils {
             final HttpResponse nettyResponse,
             ResteasyProviderFactory providerFactory) {
         final InputStream nettyStream = new ChannelBufferInputStream(nettyResponse.getContent());
-        BaseClientResponse<?> clientResponse = new BaseClientResponse<Object>(new BaseClientResponse.BaseClientResponseStreamFactory() {
-            @Override public InputStream getInputStream() throws IOException {
-                return nettyStream;
-            }
-            @Override public void performReleaseConnection() {
-            }
-        });
+        BaseClientResponse<?> clientResponse = new BaseClientResponse<Object>(
+                new BaseClientResponse.BaseClientResponseStreamFactory() {
+                    @Override public InputStream getInputStream() throws IOException {
+                        return nettyStream;
+                    }
+                    @Override public void performReleaseConnection() {
+                    }
+                });
         clientResponse.setStatus(nettyResponse.getStatus().getCode());
         clientResponse.setHeaders(getHeadersAsMultimap(nettyResponse));
         clientResponse.setProviderFactory(providerFactory);
