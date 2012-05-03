@@ -27,13 +27,13 @@ import java.util.Map;
 public class NettyRequestWrapper implements org.jboss.resteasy.spi.HttpRequest {
 
     /** HTTP header: content type negotiation */
-    public static final String ACCEPT_HEADER = "accept";
+    public static final String ACCEPT_HEADER = "Accept";
 
     /** HTTP header: language negotiation */
-    public static final String ACCEPT_LANGUAGE_HEADER = "accept-language";
+    public static final String ACCEPT_LANGUAGE_HEADER = "Accept-Language";
 
     /** HTTP header: content type output */
-    public static final String CONTENT_TYPE_HEADER = "content-type";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     /** Converts Strings to MediaTypes */
     public static final Function<String,MediaType> TO_MEDIA_TYPE = new Function<String, MediaType>() {
