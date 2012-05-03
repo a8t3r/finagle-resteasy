@@ -10,6 +10,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.resteasy.core.Dispatcher;
 
+import static org.jboss.netty.util.CharsetUtil.UTF_8;
 import static opower.util.log.LoggingUtils.info;
 
 /**
@@ -23,7 +24,7 @@ import static opower.util.log.LoggingUtils.info;
  */
 public class RestEasyFinagleService extends Service<HttpRequest,HttpResponse> {
 
-    private static final Log LOG = LogFactory.getLog(FinagleServiceClientExecutor.class);
+    private static final Log LOG = LogFactory.getLog(RestEasyFinagleService.class);
 
     private final Dispatcher dispatcher;
 
@@ -37,6 +38,7 @@ public class RestEasyFinagleService extends Service<HttpRequest,HttpResponse> {
             for (String name : request.getHeaderNames()) {
                 LOG.debug(name + ": " + request.getHeaders(name));
             }
+            LOG.debug("body: " + request.getContent().toString(UTF_8));
         }
         HttpResponse nettyResponse = generateResponse(request);
         info(LOG, "outbound response %s", nettyResponse.getStatus());
