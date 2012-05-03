@@ -11,6 +11,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import java.net.InetSocketAddress;
 
 /**
+ * Makes for a client
+ *
  * @author ed.peters
  */
 public final class FinagleClient {
