@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.resteasy.plugins.providers.FormUrlEncodedProvider;
 import org.jboss.resteasy.spi.AsynchronousResponse;
 import org.jboss.resteasy.util.Encode;
 
@@ -13,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -120,7 +122,12 @@ public class NettyRequestWrapper implements org.jboss.resteasy.spi.HttpRequest {
 
     @Override
     public MultivaluedMap<String, String> getFormParameters() {
-        throw new UnsupportedOperationException("getFormParameters");
+        try {
+            return FormUrlEncodedProvider.parseForm(getInputStream());
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
     }
 
     // ===================================================================
