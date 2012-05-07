@@ -1,14 +1,17 @@
 package opower.finagle.resteasy;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.inject.internal.ImmutableMap;
+
 import com.twitter.finagle.Service;
+
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.resteasy.core.Dispatcher;
 import org.jboss.resteasy.core.SynchronousDispatcher;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.util.GetRestful;
+
 import org.springframework.beans.factory.ListableBeanFactory;
 
 import javax.ws.rs.core.MediaType;
