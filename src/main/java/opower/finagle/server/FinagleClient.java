@@ -9,6 +9,8 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Makes for a client
@@ -35,6 +37,12 @@ public final class FinagleClient {
                 .build();
 
         System.err.println(remote.method2());
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("one", "ONE");
+        map.put("two", "TWO");
+        map.put("three", "THREE");
+        System.err.println(remote.method4(map));
         System.exit(0);
 
     }
