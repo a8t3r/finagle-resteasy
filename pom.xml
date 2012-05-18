@@ -14,6 +14,10 @@
         <version>2.0.10</version>
     </parent>
 
+    <properties>
+        <finagle.version>3.0.0</finagle.version>
+    </properties>
+
     <dependencies>
 
         <!--
@@ -29,15 +33,13 @@
          -->
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>finagle</artifactId>
-            <version>3.0.0</version>
-            <type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.twitter</groupId>
-                    <artifactId>util</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>finagle-core</artifactId>
+            <version>${finagle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>finagle-http</artifactId>
+            <version>${finagle.version}</version>
         </dependency>
 
         <!--
