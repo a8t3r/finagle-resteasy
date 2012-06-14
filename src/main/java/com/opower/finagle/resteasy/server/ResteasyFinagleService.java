@@ -21,8 +21,7 @@ import static org.jboss.netty.util.CharsetUtil.UTF_8;
  */
 public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
 
-    // TODO how do we invoke the Dispatcher asynchronously?
-    // TODO maybe don't execute the request until Future.get() is called
+    // TODO put the service invoke into a background thread
 
     private static final Log LOG = LogFactory.getLog(ResteasyFinagleService.class);
 
