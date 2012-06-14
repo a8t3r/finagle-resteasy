@@ -53,6 +53,9 @@ public class ResteasyClientBuilder {
     private ResteasyProviderFactory providerFactory;
     private ClientBuilder clientBuilder;
 
+    protected ResteasyClientBuilder() {
+    }
+
     public ResteasyClientBuilder withHttpClient(String host) {
         return withHttpClient(host, 80);
     }
@@ -112,6 +115,10 @@ public class ResteasyClientBuilder {
                 DEFAULT_ENDPOINT_URI,
                 executor,
                 this.providerFactory);
+    }
+
+    public static ResteasyClientBuilder get() {
+        return new ResteasyClientBuilder();
     }
 
 }

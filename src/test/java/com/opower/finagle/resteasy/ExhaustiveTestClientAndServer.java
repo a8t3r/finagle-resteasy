@@ -52,9 +52,11 @@ public class ExhaustiveTestClientAndServer {
     public void performExhaustiveTest() {
 
         this.impl = new ExampleServiceImpl();
-        this.service = new ResteasyServiceBuilder().withEndpoint(impl).build();
-        this.port = BASE_PORT;
+        this.service = ResteasyServiceBuilder.get()
+            .withEndpoint(impl)
+            .build();
 
+        this.port = BASE_PORT;
         while (this.port < BASE_PORT + MAX_TRIES) {
             this.server = createServer(this.service, this.port);
             if (this.server != null) {
@@ -63,7 +65,7 @@ public class ExhaustiveTestClientAndServer {
         }
         assertNotNull("couldn't allocate server", server);
 
-        this.client = new ResteasyClientBuilder()
+        this.client = ResteasyClientBuilder.get()
                 .withHttpClient("localhost", this.port)
                 .build(ExampleService.class);
 

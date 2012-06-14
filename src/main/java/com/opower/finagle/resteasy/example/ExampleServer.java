@@ -9,6 +9,8 @@ import com.twitter.finagle.http.Http;
 import java.net.InetSocketAddress;
 
 /**
+ * Example of creating a server
+ *
  * @author ed.peters
  */
 public class ExampleServer implements ExampleService {

@@ -14,6 +14,6 @@ public interface ExampleService {
 
     @GET
     @Produces("application/json")
-    public String getGreeting();
+    String getGreeting();
 
 }

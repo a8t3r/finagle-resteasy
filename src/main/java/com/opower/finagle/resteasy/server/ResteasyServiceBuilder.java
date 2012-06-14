@@ -44,7 +44,7 @@ public class ResteasyServiceBuilder {
     private Map<String,String> languages;
     private List<Object> beans;
 
-    public ResteasyServiceBuilder() {
+    protected ResteasyServiceBuilder() {
         this.mediaTypes = Maps.newHashMap(DEFAULT_MEDIA_TYPES);
         this.languages = Maps.newHashMap();
         this.beans = Lists.newArrayList();
@@ -121,6 +121,10 @@ public class ResteasyServiceBuilder {
             dispatcher.setLanguageMappings(this.languages);
         }
         return new ResteasyFinagleService(dispatcher);
+    }
+
+    public static ResteasyServiceBuilder get() {
+        return new ResteasyServiceBuilder();
     }
 
 }
