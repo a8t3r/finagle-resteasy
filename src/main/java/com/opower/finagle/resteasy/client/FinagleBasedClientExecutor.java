@@ -1,4 +1,4 @@
-package opower.finagle.resteasy;
+package com.opower.finagle.resteasy.client;
 
 import com.twitter.finagle.Service;
 import org.apache.commons.logging.Log;
@@ -13,25 +13,25 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import javax.ws.rs.core.UriBuilder;
 
-import static opower.util.log.LoggingUtils.info;
-
 /**
- * Implementation of the RestEASY {@link org.jboss.resteasy.client.ClientExecutor} interface
- * on top of a Finagle {@link com.twitter.finagle.Service}
+ * Implementation of Resteasy {@link org.jboss.resteasy.client.ClientExecutor}
+ * interface on top of a Finagle {@link com.twitter.finagle.Service}.  This
+ * allows us to make outbound calls using a Resteasy proxy.
  *
  * TODO is there any benefit to delaying the call to Future.get?
- * TODO is there any way to be more efficent about the conversion of ChannelBuffers to bytes and back?
+ * TODO can we be more efficent about the conversion of ChannelBuffers to bytes and back?
  *
  * @author ed.peters
  */
-public class FinagleServiceClientExecutor implements ClientExecutor {
+public class FinagleBasedClientExecutor implements ClientExecutor {
 
-    private static final Log LOG = LogFactory.getLog(FinagleServiceClientExecutor.class);
+    private static final Log LOG =
+            LogFactory.getLog(FinagleBasedClientExecutor.class);
 
     private final ResteasyProviderFactory providerFactory;
     private final Service<HttpRequest,HttpResponse> finagleService;
 
-    public FinagleServiceClientExecutor(
+    public FinagleBasedClientExecutor(
             ResteasyProviderFactory providerFactory,
             Service<HttpRequest, HttpResponse> finagleService) {
         this.providerFactory = providerFactory;
@@ -49,21 +49,25 @@ public class FinagleServiceClientExecutor implements ClientExecutor {
     }
 
     @Override
-    public ClientResponse execute(ClientRequest request) throws Exception {
+    public ClientResponse execute(ClientRequest resteasyRequest)
+            throws Exception {
 
-        info(LOG, "outbound request %s %s", request.getHttpMethod(), request.getUri());
         if (LOG.isDebugEnabled()) {
-            for (String name : request.getHeaders().keySet()) {
-                LOG.debug(name + ": " + request.getHeaders().get(name));
+            LOG.debug("outbound "
+                    + resteasyRequest.getHttpMethod() + " "
+                    + resteasyRequest.getUri());
+            for (String name : resteasyRequest.getHeaders().keySet()) {
+                LOG.debug(name + ": " + resteasyRequest.getHeaders().get(name));
             }
         }
 
         HttpRequest nettyRequest = null;
         try {
-            nettyRequest = RestEasyUtils.convertToNettyRequest(request);
+            nettyRequest = new OutboundClientRequest(resteasyRequest);
         }
         catch (Exception e) {
-            throw new RuntimeException("error converting outbound RestEASY request to Netty request", e);
+            throw new RuntimeException(
+                    "error converting outbound request (Resteasy --> Netty)", e);
         }
 
         HttpResponse nettyResponse = null;
@@ -74,8 +78,8 @@ public class FinagleServiceClientExecutor implements ClientExecutor {
             throw new RuntimeException("error invoking Finagle service", e);
         }
 
-        info(LOG, "inbound response %s", nettyResponse.getStatus());
         if (LOG.isDebugEnabled()) {
+            LOG.debug("inbound " + nettyResponse.getStatus());
             for (String name : nettyResponse.getHeaderNames()) {
                 LOG.debug(name + ": " + nettyResponse.getHeaders(name));
             }
@@ -83,13 +87,20 @@ public class FinagleServiceClientExecutor implements ClientExecutor {
 
         ClientResponse response = null;
         try {
-            response = RestEasyUtils.convertToClientResponse(nettyResponse, this.providerFactory);
+            response = new InboundClientResponse(nettyResponse,
+                    this.providerFactory);
         }
         catch (Exception e) {
-            throw new RuntimeException("error converting inbound Netty response to RestEASY response", e);
+            throw new RuntimeException(
+                    "error converting inbound response (Netty --> Resteasy)", e);
         }
 
         return response;
+    }
+
+    @Override
+    public void close() throws Exception {
+        // Nothing to do here
     }
 
 }
