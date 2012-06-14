@@ -30,6 +30,7 @@ import static com.opower.finagle.resteasy.util.LoggingUtils.info;
  * annotated service interface via Resteasy.
  *
  * @author ed.peters
+ * @author jeff
  */
 public class ResteasyClientBuilder {
 
