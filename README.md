@@ -95,8 +95,8 @@ There are TODO items remaining in this code, identified with pithy and
 insightful comments in the appropriate spots.  The main items are:
 
 * *SSL*: Finagle supports SSL, but it wasn't entirely clear to me how to 
-identify at runtime when a Netty request came in on a secure channel.  
-So you should probably be able to create a secure server, but your endpoint
+identify at runtime when a Netty request came in on a secure channel.  So 
+you should probably be able to create a secure server, but your endpoint
 won't necessarily know that it's being invoked securely.  This might get
 awkward if you do stuff like generating callback links.
 
