@@ -8,8 +8,11 @@ JAX-RS standard, which in general makes writing REST services a matter of
 slapping some annotations on your code.  
 
 This project bridges the two, allowing you to write REST services as
-Java-annotated classes, and serve them through Finagle.  Here's an example
-of a service interface:
+Java-annotated classes, and serve them through Finagle.  
+
+# Tell me more!
+
+Here's an example of a service interface:
 
 ```
 import javax.ws.rs.GET;
