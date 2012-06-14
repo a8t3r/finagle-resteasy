@@ -3,7 +3,7 @@
 Finagle is an open-source library from twitter that provides a lightweight
 abstraction for HTTP services.  The homepage is here:
 
-    http://twitter.github.com/finagle/
+http://twitter.github.com/finagle/
 
 # What is Resteasy?
 
@@ -11,7 +11,7 @@ Resteasy is JBoss's implementation of the JAX-RS standard, which general makes
 writing REST services a matter of slapping some annotations on your code.  The
 homepage is here:
 
-    http://www.jboss.org/resteasy
+http://www.jboss.org/resteasy
 
 # What is this?
 
