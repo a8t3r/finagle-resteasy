@@ -7,8 +7,7 @@ the Java Servlet API, so it requires you to run inside a Servlet container.
 
 [Finagle](http://twitter.github.com/finagle/) is an open-source library from 
 Twitter that provides an extremely lightweight abstraction for HTTP services,
-built on top of [Netty](http://www.jboss.org/netty) (ironically also a JBoss
-project).
+built on top of [Netty](http://www.jboss.org/netty) (also a JBoss project).
 
 This project bridges the two, allowing you to write REST services as 
 Java-annotated classes, and serve them through Finagle to create lightweight
