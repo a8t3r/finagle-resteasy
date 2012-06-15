@@ -66,7 +66,7 @@ public class OutboundClientRequest extends DefaultHttpRequest {
      * all our requests through Netty, we want relative URIs.
      *
      * @param uri a URI
-     * @return the URI with leading protocol/host remove
+     * @return the URI with leading protocol/host removed
      */
     @VisibleForTesting
     static String stripProtocolAndHost(String uri) {

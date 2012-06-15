@@ -67,6 +67,9 @@ public class OutboundServiceResponse implements org.jboss.resteasy.spi.HttpRespo
         this.nettyResponse.setStatus(HttpResponseStatus.valueOf(status));
     }
 
+    /**
+     * @throws UnsupportedOperationException (cookies aren't supported)
+     */
     @Override
     public void addNewCookie(NewCookie cookie) {
         throw new UnsupportedOperationException("addNewCookie");

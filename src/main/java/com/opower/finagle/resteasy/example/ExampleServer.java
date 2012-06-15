@@ -33,7 +33,9 @@ public class ExampleServer implements ExampleService {
 
         Server server = ServerBuilder.safeBuild(service, builder);
 
-        // ... profit!
+        // from here your application can continue to do other work.
+        // the Server object has a background non-daemon thread that
+        // will keep the JVM alive until you call close().
 
     }
 

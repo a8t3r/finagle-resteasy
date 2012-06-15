@@ -1,6 +1,7 @@
 package com.opower.finagle.resteasy.util;
 
 import com.google.common.base.Function;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import org.jboss.netty.handler.codec.http.HttpMessage;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -56,7 +57,7 @@ public final class ServiceUtils {
             SLASH = new URI("/");
         }
         catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw Throwables.propagate(e);
         }
     }
 

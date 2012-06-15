@@ -1,6 +1,7 @@
 package com.opower.finagle.resteasy.client;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.opower.finagle.resteasy.util.ServiceUtils;
 import com.twitter.common.quantity.Amount;
 import com.twitter.common.quantity.Time;
@@ -47,7 +48,7 @@ public class ResteasyClientBuilder {
             DEFAULT_ENDPOINT_URI = new URI("http://localhost/");
         }
         catch (URISyntaxException e) {
-            throw new RuntimeException("wtf?", e);
+            throw Throwables.propagate(e);
         }
     }
 
@@ -57,12 +58,21 @@ public class ResteasyClientBuilder {
     protected ResteasyClientBuilder() {
     }
 
+    /**
+     * Same as <code>withHttpClient(host, 80)</code>
+     */
     public ResteasyClientBuilder withHttpClient(String host) {
         return withHttpClient(host, 80);
     }
 
+    /**
+     * @param host the remote host to connect to (e.g. "foo.bar.com")
+     * @param port the remote port to connect to
+     * @return this (for chaining)
+     */
     public ResteasyClientBuilder withHttpClient(String host, int port) {
         Preconditions.checkNotNull(host, "no host supplied");
+        Preconditions.checkArgument(port > 0, "invalid port supplied");
         info(LOG, "new HTTP client for %s:%s", host, port);
         ClientBuilder builder = ClientBuilder
                 .get()
@@ -72,6 +82,12 @@ public class ResteasyClientBuilder {
         return withClientBuilder(builder);
     }
 
+    /**
+     * @param zkHost the hostname of a Zookeeper server to connect to
+     * @param zkPort the port for the Zookeeper host
+     * @param zkLocator the name-service path of the service to connect to
+     * @return this (for chaining)
+     */
     public ResteasyClientBuilder withZookeeperClient(String zkHost,
                                                      int zkPort,
                                                      String zkLocator) {
@@ -90,11 +106,19 @@ public class ResteasyClientBuilder {
         return withClientBuilder(builder);
     }
 
+    /**
+     * @param clientBuilder an arbitrary {@link ClientBuilder} to use
+     * @return this (for chaining)
+     */
     public ResteasyClientBuilder withClientBuilder(ClientBuilder clientBuilder) {
         this.clientBuilder = clientBuilder;
         return this;
     }
 
+    /**
+     * @param providerFactory an arbitrary {@link ResteasyProviderFactory} to use
+     * @return this (for chaining)
+     */
     public ResteasyClientBuilder withProviderFactory(
             ResteasyProviderFactory providerFactory) {
         this.providerFactory = providerFactory;

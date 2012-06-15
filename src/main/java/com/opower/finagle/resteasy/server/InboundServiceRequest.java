@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 /**
- * Used when we're hosting a Resteasy-annotated service implementation. to
+ * Used when we're hosting a Resteasy-annotated service implementation.
  * Implements Resteasy's {@link org.jboss.resteasy.spi.HttpRequest} interface
  * on top of a Netty {@link org.jboss.netty.handler.codec.http.HttpRequest}
  *
@@ -103,12 +103,10 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
         return this.rawFormParams;
     }
 
-    /*
-     * Since reading form parameters requires reading the request body,
-     * we'll make sure we only do it once.  We'll synchronize on a
-     * separate lock object just to be safe.
-     */
     protected void readFormParams() {
+        // we need to synchronize this so it happens only once.  we're
+        // using a separate lock object in case something else inside
+        // Resteasy tries to synchronize on this request.
         synchronized (this.formParamLock) {
             if (this.rawFormParams == null) {
                 try {
@@ -138,11 +136,17 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
         this.preProcessedPath = path;
     }
 
+    /**
+     * @throws UnsupportedOperationException (Resteasy async is not supported)
+     */
     @Override
     public AsynchronousResponse createAsynchronousResponse(long suspendTimeout) {
         throw new UnsupportedOperationException("createAsynchronousResponse");
     }
 
+    /**
+     * @throws UnsupportedOperationException (Resteasy async is not supported)
+     */
     @Override
     public AsynchronousResponse getAsynchronousResponse() {
         throw new UnsupportedOperationException("getAsynchronousResponse");
