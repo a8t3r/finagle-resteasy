@@ -11,6 +11,7 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.junit.Test;
 
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import static com.opower.finagle.resteasy.AssertionHelpers.assertContentEquals;
 import static com.opower.finagle.resteasy.AssertionHelpers.assertHeaderEquals;
@@ -123,7 +124,9 @@ public class TestResteasyFinagleService {
     @SuppressWarnings("unchecked")
     protected void invoke(final Runnable runner) {
         assertNotNull("no input netty message", this.nettyRequest);
-        Service service = new ResteasyFinagleService(new MockDispatcher(runner));
+        Service service = new ResteasyFinagleService(
+                new MockDispatcher(runner),
+                Executors.newSingleThreadExecutor());
         Future future = service.apply(this.nettyRequest);
         this.nettyResponse =
                 (org.jboss.netty.handler.codec.http.HttpResponse) future.get();

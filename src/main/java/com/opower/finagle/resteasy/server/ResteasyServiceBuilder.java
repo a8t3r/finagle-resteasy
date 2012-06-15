@@ -17,6 +17,8 @@ import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Builder for a Finagle {@link com.twitter.finagle.Service} that knows how to
@@ -43,11 +45,31 @@ public class ResteasyServiceBuilder {
     private Map<String,MediaType> mediaTypes;
     private Map<String,String> languages;
     private List<Object> beans;
+    private Executor executor;
 
     protected ResteasyServiceBuilder() {
         this.mediaTypes = Maps.newHashMap(DEFAULT_MEDIA_TYPES);
         this.languages = Maps.newHashMap();
         this.beans = Lists.newArrayList();
+    }
+
+    /**
+     * Sets the size of the background thread pool
+     * @param size fixed number of threads for request handling pool
+     * @return this (for chaining)
+     */
+    public ResteasyServiceBuilder withThreadPoolSize(int size) {
+        return withExecutor(Executors.newFixedThreadPool(size));
+    }
+
+    /**
+     * Sets a custom executor to be used for handling calls
+     * @param executor the executor to use
+     * @return this (for chaining)
+     */
+    public ResteasyServiceBuilder withExecutor(Executor executor) {
+        this.executor = executor;
+        return this;
     }
 
     /**
@@ -66,6 +88,17 @@ public class ResteasyServiceBuilder {
             bean
         );
         this.beans.add(bean);
+        return this;
+    }
+
+    /**
+     * Same as calling {@link #withEndpoint(Object)} on each bean in
+     * the supplied list
+     */
+    public ResteasyServiceBuilder withEndpoints(Object... beans) {
+        for (Object bean : beans) {
+            withEndpoint(bean);
+        }
         return this;
     }
 
@@ -112,6 +145,9 @@ public class ResteasyServiceBuilder {
         if (this.providerFactory == null) {
             this.providerFactory = ServiceUtils.getDefaultProviderFactory();
         }
+        if (this.executor == null) {
+            this.executor = Executors.newSingleThreadExecutor();
+        }
         Dispatcher dispatcher = new SynchronousDispatcher(this.providerFactory);
         dispatcher.setMediaTypeMappings(this.mediaTypes);
         for (Object bean : this.beans) {
@@ -120,7 +156,7 @@ public class ResteasyServiceBuilder {
         if (this.languages.size() > 0) {
             dispatcher.setLanguageMappings(this.languages);
         }
-        return new ResteasyFinagleService(dispatcher);
+        return new ResteasyFinagleService(dispatcher, executor);
     }
 
     public static ResteasyServiceBuilder get() {

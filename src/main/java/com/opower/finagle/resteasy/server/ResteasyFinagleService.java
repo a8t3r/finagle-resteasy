@@ -2,12 +2,15 @@ package com.opower.finagle.resteasy.server;
 
 import com.twitter.finagle.Service;
 import com.twitter.util.Future;
+import com.twitter.util.Promise;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.resteasy.core.Dispatcher;
+
+import java.util.concurrent.Executor;
 
 import static com.opower.finagle.resteasy.util.LoggingUtils.info;
 import static org.jboss.netty.util.CharsetUtil.UTF_8;
@@ -21,55 +24,79 @@ import static org.jboss.netty.util.CharsetUtil.UTF_8;
  */
 public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
 
-    // TODO put the service invoke into a background thread
-
     private static final Log LOG = LogFactory.getLog(ResteasyFinagleService.class);
 
     private final Dispatcher dispatcher;
+    private final Executor executor;
 
-    public ResteasyFinagleService(Dispatcher dispatcher) {
+    public ResteasyFinagleService(Dispatcher dispatcher,
+                                  Executor executor) {
         this.dispatcher = dispatcher;
+        this.executor = executor;
     }
 
+    /**
+     * Schedules a request for completion
+     * @param request an inbound Netty request
+     * @return a {@link Promise} that will return the result of completing
+     * the request
+     */
     public Future<HttpResponse> apply(HttpRequest request) {
         info(LOG, "inbound request %s %s",
                 request.getMethod().getName(),
                 request.getUri());
-        HttpResponse nettyResponse = generateResponse(request);
-        info(LOG, "outbound response %s", nettyResponse.getStatus());
-        return Future.value(nettyResponse);
+        Promise<HttpResponse> promise = new Promise<HttpResponse>();
+        this.executor.execute(new ResponseWorker(request, promise));
+        return promise;
     }
 
-    /*
-     * Generates the response
+    /**
+     * {@link Runnable} implementation that converts a Netty request to
+     * Resteasy, then uses the Resteasy Dispatcher to satisfy the call.
      */
-    protected HttpResponse generateResponse(HttpRequest nettyRequest) {
-        InboundServiceRequest jaxrsRequest = null;
-        OutboundServiceResponse jaxrsResponse = null;
-        HttpVersion version = nettyRequest.getProtocolVersion();
-        try {
+    protected class ResponseWorker implements Runnable {
+
+        private final HttpRequest nettyRequest;
+        private final Promise<HttpResponse> promise;
+
+        public ResponseWorker(HttpRequest nettyRequest,
+                              Promise<HttpResponse> promise) {
+            this.nettyRequest = nettyRequest;
+            this.promise = promise;
+        }
+
+        @Override
+        public void run() {
+            HttpVersion version = nettyRequest.getProtocolVersion();
+            HttpResponse nettyResponse = null;
+            try {
+                nettyResponse = computeResponse(version);
+            }
+            catch (Exception e) {
+                info(LOG, e, "unhandled error creating HTTP response");
+                nettyResponse = new UnhandledErrorResponse(version, e);
+            }
+            info(LOG, "outbound response %s", nettyResponse.getStatus());
+            this.promise.setValue(nettyResponse);
+        }
+
+        protected HttpResponse computeResponse(HttpVersion version) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("incoming " + nettyRequest.getUri());
                 for (String name : nettyRequest.getHeaderNames()) {
                     LOG.debug(name + ": " + nettyRequest.getHeaders(name));
                 }
-                LOG.debug("body: " + nettyRequest.getContent().toString(UTF_8));
+                LOG.debug("body: " +
+                        nettyRequest.getContent().toString(UTF_8));
             }
-            jaxrsRequest = new InboundServiceRequest(nettyRequest);
-            jaxrsResponse = new OutboundServiceResponse(version);
+            InboundServiceRequest jaxrsRequest =
+                    new InboundServiceRequest(nettyRequest);
+            OutboundServiceResponse jaxrsResponse =
+                    new OutboundServiceResponse(version);
+            dispatcher.invoke(jaxrsRequest, jaxrsResponse);
+            return jaxrsResponse.getNettyResponse();
         }
-        catch (Exception e) {
-            info(LOG, e, "error creating request/response wrappers");
-            return new UnhandledErrorResponse(version, e);
-        }
-        try {
-            this.dispatcher.invoke(jaxrsRequest, jaxrsResponse);
-        }
-        catch (Exception e) {
-            info(LOG, e, "error during dispatch");
-            return new UnhandledErrorResponse(version, e);
-        }
-        return jaxrsResponse.getNettyResponse();
+
     }
 
 }
