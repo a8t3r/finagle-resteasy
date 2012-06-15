@@ -1,14 +1,18 @@
 # What is this?
 
-[Finagle](http://twitter.github.com/finagle/) is an open-source library from 
-Twitter that provides a lightweight abstraction for HTTP services.
-
 [Resteasy](http://www.jboss.org/resteasy) is JBoss's implementation of the 
 JAX-RS standard, which in general makes writing REST services a matter of 
-slapping some annotations on your code.  
+slapping some annotations on your code.  Unfortunately, it's built around
+the Java Servlet API, so it requires you to run inside a Servlet container.
 
-This project bridges the two, allowing you to write REST services as
-Java-annotated classes, and serve them through Finagle.  
+[Finagle](http://twitter.github.com/finagle/) is an open-source library from 
+Twitter that provides an extremely lightweight abstraction for HTTP services,
+built on top of [Netty](http://www.jboss.org/netty) (ironically also a JBoss
+project).
+
+This project bridges the two, allowing you to write REST services as 
+Java-annotated classes, and serve them through Finagle to create lightweight
+services without having to bundle a web container.
 
 # Tell me more!
 
@@ -100,10 +104,10 @@ you should probably be able to create a secure server, but your endpoint
 won't necessarily know that it's being invoked securely.  This might get
 awkward if you do stuff like generating callback links.
 
-* *Threading*: The actual Service implementation is relatively poorly behaved, 
-dispatching calls synchronously on the Finagle event thread.  Resolving
-this will require me to dig further into how Resteasy supports 
-asynchronous dispatch.
+* *Non-blocking Services*: Resteasy supports [asynchronous HTTP request processing](http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/Asynchronous_HTTP_Request_Processing.html)
+through some custom annotations and interfaces, for non-blocking service
+implementations that want to handle their own threading.  These are not 
+supported.
 
 * *Memory*: While processing responses, we have to fully serialize the
 response message using Resteasy so we know what headers to send out (since
