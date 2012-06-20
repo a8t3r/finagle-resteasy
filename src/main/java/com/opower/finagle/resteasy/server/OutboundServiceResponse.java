@@ -28,7 +28,7 @@ public class OutboundServiceResponse implements org.jboss.resteasy.spi.HttpRespo
     // JBoss interface because of all the method name clashes
     // TODO do we want cookie support? does netty even allow it?
     // TODO no clue how to get #isCommitted() from netty
-    // TODO should we support chunking?
+    // TODO how would we support chunking?
 
     private final HttpResponse nettyResponse;
     private final MultivaluedMap<String,Object> headerWrapper;

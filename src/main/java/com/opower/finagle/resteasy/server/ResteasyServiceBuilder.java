@@ -74,20 +74,18 @@ public class ResteasyServiceBuilder {
 
     /**
      * Adds a REST-annotated bean to the dispatcher for this service
-     * @param bean a service bean
+     * @param endpoint a service bean
      * @return this (for chaining)
      * @throws NullPointerException if the supplied bean is null
      * @throws IllegalArgumentException if the supplied bean isn't a root
      * resource, as reported by {@link GetRestful}
      */
-    public ResteasyServiceBuilder withEndpoint(Object bean) {
-        Preconditions.checkNotNull(bean, "null endpoints not allowed");
+    public ResteasyServiceBuilder withEndpoint(Object endpoint) {
+        Preconditions.checkNotNull(endpoint, "endpoint");
         Preconditions.checkArgument(
-            GetRestful.isRootResource(bean.getClass()),
-            "endpoint %s is not a root resource",
-            bean
-        );
-        this.beans.add(bean);
+            GetRestful.isRootResource(endpoint.getClass()),
+            "endpoint is not a root resource");
+        this.beans.add(endpoint);
         return this;
     }
 

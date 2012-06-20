@@ -1,5 +1,6 @@
 package com.opower.finagle.resteasy.server;
 
+import com.google.common.base.Preconditions;
 import com.twitter.finagle.Service;
 import com.twitter.util.Future;
 import com.twitter.util.Promise;
@@ -31,8 +32,8 @@ public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
 
     public ResteasyFinagleService(Dispatcher dispatcher,
                                   Executor executor) {
-        this.dispatcher = dispatcher;
-        this.executor = executor;
+        this.dispatcher = Preconditions.checkNotNull(dispatcher, "dispatcher");
+        this.executor = Preconditions.checkNotNull(executor, "executor");
     }
 
     /**
@@ -42,6 +43,7 @@ public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
      * the request
      */
     public Future<HttpResponse> apply(HttpRequest request) {
+        Preconditions.checkNotNull(request, "request");
         info(LOG, "inbound request %s %s",
                 request.getMethod().getName(),
                 request.getUri());

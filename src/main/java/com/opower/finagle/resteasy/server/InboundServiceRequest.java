@@ -1,5 +1,6 @@
 package com.opower.finagle.resteasy.server;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.opower.finagle.resteasy.util.ServiceUtils;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -53,16 +54,19 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
 
     @Override
     public Object getAttribute(String name) {
+        Preconditions.checkNotNull(name, "name");
         return this.attributeMap.get(name);
     }
 
     @Override
     public void removeAttribute(String name) {
+        Preconditions.checkNotNull(name, "name");
         this.attributeMap.remove(name);
     }
 
     @Override
     public void setAttribute(String name, Object value) {
+        Preconditions.checkNotNull(name, "name");
         this.attributeMap.put(name, value);
     }
 

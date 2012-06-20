@@ -68,15 +68,21 @@ public class NettyHeaderWrapper implements MultivaluedMap<String,Object> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Object> put(String key, List<Object> values) {
+        // this is safe -- we're converting List<String> to List<Object>
+        List<Object> oldValue = (List) nettyResponse.getHeaders(key.toString());
         nettyResponse.setHeader(key, values);
-        return null;
+        return oldValue;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Object> remove(Object key) {
+        // this is safe -- we're converting List<String> to List<Object>
+        List<Object> oldValue = (List) nettyResponse.getHeaders(key.toString());
         nettyResponse.removeHeader(key.toString());
-        return null;
+        return oldValue;
     }
 
     @Override

@@ -42,7 +42,8 @@ public class TestNettyHeaderWrapper {
         assertMapping("k", "v1");
         wrapper.putSingle("k", "v2");
         assertMapping("k", "v2");
-        wrapper.put("k", Arrays.<Object>asList("v3", "v4"));
+        assertEquals(Arrays.asList("v2"),
+                wrapper.put("k", Arrays.<Object>asList("v3", "v4")));
         assertMapping("k", "v3", "v4");
     }
 
@@ -50,7 +51,7 @@ public class TestNettyHeaderWrapper {
     public void testRemove() throws Exception {
         response.setHeader("k", "v");
         assertMapping("k", "v");
-        wrapper.remove("k");
+        assertEquals(Arrays.asList("v"), wrapper.remove("k"));
         assertMapping("k");
     }
 

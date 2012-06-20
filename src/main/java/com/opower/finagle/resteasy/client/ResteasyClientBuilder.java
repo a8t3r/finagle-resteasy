@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.opower.finagle.resteasy.util.LoggingUtils.info;
+import static com.twitter.common.quantity.Time.SECONDS;
 
 /**
  * Fluent-style builder for clients that wrap a Finagle client with an
@@ -34,6 +35,18 @@ import static com.opower.finagle.resteasy.util.LoggingUtils.info;
  * @author jeff
  */
 public class ResteasyClientBuilder {
+
+    /**
+     * Default limit for the number of host connections
+     * @see {@link ClientBuilder#hostConnectionLimit(int)}
+     */
+    public static final int DEFAULT_HOST_CONNECTIONS = 1;
+
+    /**
+     * Default timeout for Zookeeper connections
+     */
+    public static final Amount<Integer,Time> DEFAULT_ZK_TIMEOUT =
+            Amount.of(1, SECONDS);
 
     private static final Log LOG = LogFactory.getLog(ResteasyClientBuilder.class);
 
@@ -66,23 +79,35 @@ public class ResteasyClientBuilder {
     }
 
     /**
+     * Configures an HTTP client builder with the default host connection
+     * limit.
      * @param host the remote host to connect to (e.g. "foo.bar.com")
      * @param port the remote port to connect to
      * @return this (for chaining)
      */
     public ResteasyClientBuilder withHttpClient(String host, int port) {
-        Preconditions.checkNotNull(host, "no host supplied");
-        Preconditions.checkArgument(port > 0, "invalid port supplied");
+        Preconditions.checkNotNull(host, "host");
+        Preconditions.checkArgument(port > 0, "invalid port " + port);
         info(LOG, "new HTTP client for %s:%s", host, port);
         ClientBuilder builder = ClientBuilder
                 .get()
                 .codec(Http.get())
-                .hostConnectionLimit(1)
+                .hostConnectionLimit(DEFAULT_HOST_CONNECTIONS)
                 .hosts(new InetSocketAddress(host, port));
         return withClientBuilder(builder);
     }
 
     /**
+     * Same as <code>withZookeeperClient(zkHost, 2181, zkLocator)</code>
+     */
+    public ResteasyClientBuilder withZookeeperClient(String zkHost,
+                                                     String zkLocator) {
+        return withZookeeperClient(zkHost, 2181, zkLocator);
+    }
+
+    /**
+     * Configures a Zookeeper client builder with the default host connection
+     * limit and timeout.
      * @param zkHost the hostname of a Zookeeper server to connect to
      * @param zkPort the port for the Zookeeper host
      * @param zkLocator the name-service path of the service to connect to
@@ -91,17 +116,17 @@ public class ResteasyClientBuilder {
     public ResteasyClientBuilder withZookeeperClient(String zkHost,
                                                      int zkPort,
                                                      String zkLocator) {
-        Preconditions.checkNotNull(zkHost, "no host supplied");
-        Preconditions.checkNotNull(zkLocator, "no service locator supplied");
+        Preconditions.checkNotNull(zkHost, "zkHost");
+        Preconditions.checkNotNull(zkLocator, "zkLocator");
         info(LOG, "new Zookeeper client for %s:%s", zkHost, zkPort, zkLocator);
         InetSocketAddress addr = new InetSocketAddress(zkHost, zkPort);
         ServerSet serverSet = new ServerSetImpl(
-                new ZooKeeperClient(Amount.of(1, Time.SECONDS), addr),
+                new ZooKeeperClient(DEFAULT_ZK_TIMEOUT, addr),
                 zkLocator);
         ClientBuilder builder = ClientBuilder
                 .get()
                 .codec(Http.get())
-                .hostConnectionLimit(1)
+                .hostConnectionLimit(DEFAULT_HOST_CONNECTIONS)
                 .cluster(new ZookeeperServerSetCluster(serverSet));
         return withClientBuilder(builder);
     }
@@ -126,8 +151,7 @@ public class ResteasyClientBuilder {
     }
 
     public <T> T build(Class<T> serviceInterface) {
-        Preconditions.checkNotNull(this.clientBuilder,
-                "no client builder provided");
+        Preconditions.checkNotNull(this.clientBuilder, "clientBuilder");
         if (this.providerFactory == null) {
             this.providerFactory = ServiceUtils.getDefaultProviderFactory();
         }
