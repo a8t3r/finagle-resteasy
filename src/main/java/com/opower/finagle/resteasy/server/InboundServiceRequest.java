@@ -38,7 +38,6 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     private String preProcessedPath;
     private MultivaluedMap<String,String> rawFormParams;
     private MultivaluedMap<String,String> decodedFormParams;
-    private final Object formParamLock;
 
     public InboundServiceRequest(HttpRequest nettyRequest) {
         this.nettyRequest = nettyRequest;
@@ -49,7 +48,6 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
         this.overrideStream = null;
         this.underlyingStream =
                 new ChannelBufferInputStream(nettyRequest.getContent());
-        this.formParamLock = new Object();
     }
 
     @Override
@@ -107,21 +105,18 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
         return this.rawFormParams;
     }
 
-    protected void readFormParams() {
-        // we need to synchronize this so it happens only once.  we're
-        // using a separate lock object in case something else inside
-        // Resteasy tries to synchronize on this request.
-        synchronized (this.formParamLock) {
-            if (this.rawFormParams == null) {
-                try {
-                    this.rawFormParams = FormUrlEncodedProvider.parseForm(
-                            getInputStream());
-                }
-                catch (IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-                this.decodedFormParams = Encode.decode(this.rawFormParams);
+    // since parsing form parameters requires reading the request body, we need to
+    // synchronize it so it happens only once
+    protected synchronized void readFormParams() {
+        if (this.rawFormParams == null) {
+            try {
+                this.rawFormParams = FormUrlEncodedProvider.parseForm(
+                        getInputStream());
             }
+            catch (IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+            this.decodedFormParams = Encode.decode(this.rawFormParams);
         }
     }
 
