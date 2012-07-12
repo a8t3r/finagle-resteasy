@@ -11,6 +11,8 @@
         <version>7</version>
     </parent>
 
+    <name>finagle-resteasy</name>
+    <description>Implementation of the Resteasy SPI on top of Finagle</description>
     <groupId>com.opower</groupId>
     <artifactId>finagle-resteasy</artifactId>
     <version>1.0.0-SNAPSHOT</version>
