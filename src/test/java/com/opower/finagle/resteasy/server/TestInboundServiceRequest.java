@@ -1,6 +1,7 @@
 package com.opower.finagle.resteasy.server;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.net.HttpHeaders;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -12,11 +13,12 @@ import java.util.Arrays;
 
 import static com.opower.finagle.resteasy.AssertionHelpers.assertMultivaluedMapEquals;
 import static org.jboss.netty.handler.codec.http.HttpMethod.POST;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.jboss.netty.handler.codec.http.HttpMethod.GET;
 import static com.opower.finagle.resteasy.AssertionHelpers.assertUriInfoEquals;
+import java.util.List;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Tests for the mapping of Netty requests to Resteasy.
@@ -50,6 +52,17 @@ public class TestInboundServiceRequest {
                 "single", "a",
                 "multi", Arrays.asList("a", "b", "c")
             ));
+    }
+
+    @Test
+    public void testRequestHeaders_MultiAcceptAsCSV() throws Exception {
+        DefaultHttpRequest nettyRequest = newRequest(GET, "/foo");
+        nettyRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML + "," + MediaType.APPLICATION_JSON);
+        HttpRequest resteasyRequest = new InboundServiceRequest(nettyRequest);
+        List<MediaType> mediaTypes = resteasyRequest.getHttpHeaders().getAcceptableMediaTypes();
+        assertEquals(2, mediaTypes.size());
+        assertEquals(MediaType.APPLICATION_XML_TYPE, mediaTypes.get(0));
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, mediaTypes.get(1));
     }
 
     @Test

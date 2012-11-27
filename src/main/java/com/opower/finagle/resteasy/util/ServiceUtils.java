@@ -2,6 +2,7 @@ package com.opower.finagle.resteasy.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.jboss.netty.handler.codec.http.HttpMessage;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -45,6 +46,17 @@ public final class ServiceUtils {
             @Override
             public MediaType apply(@Nullable String input) {
                 return input == null ? null : MediaType.valueOf(input);
+            }
+        };
+
+    /**
+     * Splits a header string on the "," character
+     */
+    public static final Function<String, List<String>> SPLIT_HEADER_VALUES =
+        new Function<String, List<String>>() {
+            @Override
+            public List<String> apply(@Nullable String input) {
+                return input == null ? Lists.<String>newArrayList() : Lists.newArrayList(input.split(","));
             }
         };
 
@@ -130,10 +142,13 @@ public final class ServiceUtils {
         // if you're using filename extensions to determine MIME type,
         // Resteasy relies on the value of the "accept" header being a
         // mutable list
-        List<String> acceptStrings = map.get(ACCEPT);
+        Iterable<String> acceptStrings = map.get(ACCEPT);
+        if(acceptStrings != null) {
+            acceptStrings = Iterables.concat(Iterables.transform(acceptStrings, SPLIT_HEADER_VALUES));
+        }
         impl.setAcceptableMediaTypes(acceptStrings == null
                 ? Lists.<MediaType>newArrayList()
-                : Lists.transform(acceptStrings, TO_MEDIA_TYPE));
+                : Lists.newArrayList(Iterables.transform(acceptStrings, TO_MEDIA_TYPE)));
         return impl;
     }
 
