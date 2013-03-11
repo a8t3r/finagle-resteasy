@@ -2,7 +2,6 @@ package com.opower.finagle.resteasy.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.jboss.netty.handler.codec.http.HttpMessage;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -29,6 +28,8 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ACCEPT;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ACCEPT_LANGUAGE;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * Helpers for converting headers and URIs between their corresponding Netty
@@ -56,7 +57,9 @@ public final class ServiceUtils {
         new Function<String, List<String>>() {
             @Override
             public List<String> apply(@Nullable String input) {
-                return input == null ? Lists.<String>newArrayList() : Lists.newArrayList(input.split(","));
+                return input == null 
+                    ? Lists.<String>newArrayList() 
+                    : Lists.newArrayList(input.split(","));
             }
         };
 
@@ -144,11 +147,11 @@ public final class ServiceUtils {
         // mutable list
         Iterable<String> acceptStrings = map.get(ACCEPT);
         if(acceptStrings != null) {
-            acceptStrings = Iterables.concat(Iterables.transform(acceptStrings, SPLIT_HEADER_VALUES));
+            acceptStrings = concat(transform(acceptStrings, SPLIT_HEADER_VALUES));
         }
         impl.setAcceptableMediaTypes(acceptStrings == null
                 ? Lists.<MediaType>newArrayList()
-                : Lists.newArrayList(Iterables.transform(acceptStrings, TO_MEDIA_TYPE)));
+                : Lists.newArrayList(transform(acceptStrings, TO_MEDIA_TYPE)));
         return impl;
     }
 
