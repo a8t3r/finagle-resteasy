@@ -147,13 +147,11 @@ public class ResteasyServiceBuilder {
             this.executor = Executors.newSingleThreadExecutor();
         }
         Dispatcher dispatcher = new SynchronousDispatcher(this.providerFactory);
-        dispatcher.setMediaTypeMappings(this.mediaTypes);
+
         for (Object bean : this.beans) {
             dispatcher.getRegistry().addSingletonResource(bean);
         }
-        if (this.languages.size() > 0) {
-            dispatcher.setLanguageMappings(this.languages);
-        }
+
         return new ResteasyFinagleService(dispatcher, executor);
     }
 

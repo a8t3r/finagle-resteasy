@@ -1,8 +1,6 @@
 package com.opower.finagle.resteasy.example;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 
 /**
  * Sample of a JAX-RS annotated service interface
@@ -10,10 +8,12 @@ import javax.ws.rs.Produces;
  * @author ed.peters
  */
 @Path("/greeting")
+@Produces("application/json")
+@Consumes("application/json")
 public interface ExampleService {
 
-    @GET
-    @Produces("application/json")
-    String getGreeting();
+    @POST
+    @Path("/{name}")
+    String getGreeting(@PathParam("name") String name, Model model);
 
 }

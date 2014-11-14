@@ -4,12 +4,12 @@ import com.google.common.base.Preconditions;
 import com.twitter.finagle.Service;
 import com.twitter.util.Future;
 import com.twitter.util.Promise;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.resteasy.core.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executor;
 
@@ -25,7 +25,7 @@ import static org.jboss.netty.util.CharsetUtil.UTF_8;
  */
 public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
 
-    private static final Log LOG = LogFactory.getLog(ResteasyFinagleService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResteasyFinagleService.class);
 
     private final Dispatcher dispatcher;
     private final Executor executor;
@@ -93,6 +93,7 @@ public class ResteasyFinagleService extends Service<HttpRequest,HttpResponse> {
             }
             InboundServiceRequest jaxrsRequest =
                     new InboundServiceRequest(nettyRequest);
+
             OutboundServiceResponse jaxrsResponse =
                     new OutboundServiceResponse(version);
             dispatcher.invoke(jaxrsRequest, jaxrsResponse);

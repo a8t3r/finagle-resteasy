@@ -44,8 +44,8 @@
     </developers>
 
     <properties>
-        <finagle-version>3.0.0</finagle-version>
-        <resteasy-version>2.3.1.GA</resteasy-version>
+        <finagle-version>6.20.0</finagle-version>
+        <resteasy-version>3.0.8.Final</resteasy-version>
     </properties>
 
     <build>
@@ -81,135 +81,36 @@
         </plugins>
     </build>
 
-     <profiles>
-        <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.1</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <dependencies>
 
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>finagle-core_2.9.1</artifactId>
+            <artifactId>finagle-core_2.9.2</artifactId>
             <version>${finagle-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>finagle-http_2.9.1</artifactId>
+            <artifactId>finagle-http_2.9.2</artifactId>
             <version>${finagle-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>finagle-serversets_2.9.1</artifactId>
+            <artifactId>finagle-serversets_2.9.2</artifactId>
             <version>${finagle-version}</version>
         </dependency>
 
-        <!--
-            finagle-serversets needs Thrift through a transitive dependency on com.twitter.common.zookeeper.
-            Be sure we use the one that is compatible with the version of finagle we want to use.
-         -->
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>finagle-thrift_2.9.1</artifactId>
+            <artifactId>finagle-thrift_2.9.2</artifactId>
             <version>${finagle-version}</version>
         </dependency>
 
-        <!--
-            finagle-serversets depends on the following hierarchy:
-            1) com.twitter:finagle-serversets_2.9.1:jar:3.0.0
-            2) com.twitter.common.zookeeper:server-set:jar:0.0.5
-            3) com.twitter.common:service-thrift:jar:0.0.22
-            4) com.twitter:util:jar:1.8.18
-            com.twitter:util:1.8.18 is actually a POM, not a jar.  service-thrift:0.0.23 correctly omits it,
-            so depend on that version instead, but be sure that it does not bring in bad versions of finagle
-         -->
-        <dependency>
-            <groupId>com.twitter.common</groupId>
-            <artifactId>service-thrift</artifactId>
-            <version>0.0.23</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.twitter</groupId>
-                    <artifactId>finagle-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.twitter</groupId>
-                    <artifactId>finagle-thrift</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!--
-            The version needed by zookeeper server-sets
-         -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>12.0</version>
-        </dependency>
-
-        <!--
-            Use the most recent version of server-sets, as opposed to an old one Finagle depends on
-         -->
-        <dependency>
-            <groupId>com.twitter.common.zookeeper</groupId>
-            <artifactId>server-set</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.twitter</groupId>
-                    <artifactId>finagle-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.twitter</groupId>
-                    <artifactId>finagle-thrift</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!--
-            Use the most recent version of group, as opposed to an old one Finagle depends on
-         -->
-        <dependency>
-            <groupId>com.twitter.common.zookeeper</groupId>
-            <artifactId>group</artifactId>
-            <version>0.0.12</version>
-        </dependency>
-
-        <!--
-            Use the most recent version of client, as opposed to an old one Finagle depends on
-         -->
-        <dependency>
-            <groupId>com.twitter.common.zookeeper</groupId>
-            <artifactId>client</artifactId>
-            <version>0.0.8</version>
         </dependency>
 
         <dependency>
@@ -217,6 +118,13 @@
             <artifactId>resteasy-jaxrs</artifactId>
             <version>${resteasy-version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.jboss.resteasy</groupId>

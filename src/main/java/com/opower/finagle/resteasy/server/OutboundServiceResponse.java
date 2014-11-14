@@ -32,7 +32,7 @@ public class OutboundServiceResponse implements org.jboss.resteasy.spi.HttpRespo
 
     private final HttpResponse nettyResponse;
     private final MultivaluedMap<String,Object> headerWrapper;
-    private final OutputStream outputStream;
+    private OutputStream outputStream;
 
     public OutboundServiceResponse(HttpVersion version) {
         this.nettyResponse = new DefaultHttpResponse(version, OK);
@@ -83,6 +83,11 @@ public class OutboundServiceResponse implements org.jboss.resteasy.spi.HttpRespo
     @Override
     public OutputStream getOutputStream() throws IOException {
         return this.outputStream;
+    }
+
+    @Override
+    public void setOutputStream(OutputStream os) {
+        this.outputStream = os;
     }
 
     @Override

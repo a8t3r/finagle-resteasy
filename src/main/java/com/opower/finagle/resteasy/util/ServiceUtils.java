@@ -7,29 +7,21 @@ import org.jboss.netty.handler.codec.http.HttpMessage;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.specimpl.HttpHeadersImpl;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
-import org.jboss.resteasy.specimpl.UriBuilderImpl;
-import org.jboss.resteasy.specimpl.UriInfoImpl;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
+import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.spi.ResteasyUriInfo;
 import org.jboss.resteasy.util.CaseInsensitiveMap;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ACCEPT;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ACCEPT_LANGUAGE;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST;
-import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.transform;
 
 /**
  * Helpers for converting headers and URIs between their corresponding Netty
@@ -138,21 +130,7 @@ public final class ServiceUtils {
      * {@link javax.ws.rs.core.HttpHeaders}
      */
     public static HttpHeaders toHeaders(MultivaluedMap<String,String> map) {
-        HttpHeadersImpl impl = new HttpHeadersImpl();
-        impl.setRequestHeaders(map);
-        impl.setAcceptableLanguages(map.get(ACCEPT_LANGUAGE));
-        impl.setMediaType(TO_MEDIA_TYPE.apply(map.getFirst(CONTENT_TYPE)));
-        // if you're using filename extensions to determine MIME type,
-        // Resteasy relies on the value of the "accept" header being a
-        // mutable list
-        Iterable<String> acceptStrings = map.get(ACCEPT);
-        if(acceptStrings != null) {
-            acceptStrings = concat(transform(acceptStrings, SPLIT_HEADER_VALUES));
-        }
-        impl.setAcceptableMediaTypes(acceptStrings == null
-                ? Lists.<MediaType>newArrayList()
-                : Lists.newArrayList(transform(acceptStrings, TO_MEDIA_TYPE)));
-        return impl;
+        return new ResteasyHttpHeaders(map);
     }
 
     /**
@@ -203,7 +181,7 @@ public final class ServiceUtils {
             query = split[1];
         }
 
-        URI absolutePath = new UriBuilderImpl()
+        URI absolutePath = new ResteasyUriBuilder()
                 .scheme(secure ? "https" : "http")
                 .host(host == null ? "localhost" : host)
                 .port(port)
@@ -212,11 +190,9 @@ public final class ServiceUtils {
                 .build();
 
         String rawPath = absolutePath.getRawPath();
-        List<PathSegment> pathSegments = PathSegmentImpl.parseSegments(
-                rawPath,
-                false);
+        List<PathSegment> pathSegments = PathSegmentImpl.parseSegments(rawPath, false);
 
-        return new UriInfoImpl(absolutePath, SLASH, rawPath, query, pathSegments);
+        return new ResteasyUriInfo(absolutePath);
     }
 
     /**

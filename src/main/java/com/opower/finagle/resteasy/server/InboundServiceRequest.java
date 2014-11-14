@@ -6,15 +6,19 @@ import com.opower.finagle.resteasy.util.ServiceUtils;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.resteasy.plugins.providers.FormUrlEncodedProvider;
-import org.jboss.resteasy.spi.AsynchronousResponse;
+import org.jboss.resteasy.spi.ResteasyAsynchronousContext;
+import org.jboss.resteasy.spi.ResteasyAsynchronousResponse;
+import org.jboss.resteasy.spi.ResteasyUriInfo;
 import org.jboss.resteasy.util.Encode;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Used when we're hosting a Resteasy-annotated service implementation.
@@ -32,7 +36,7 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     private final HttpRequest nettyRequest;
     private final Map<String,Object> attributeMap;
     private final HttpHeaders jaxrsHeaders;
-    private final UriInfo jaxrsUriInfo;
+    private final ResteasyUriInfo jaxrsUriInfo;
     private InputStream overrideStream;
     private InputStream underlyingStream;
     private String preProcessedPath;
@@ -43,7 +47,7 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
         this.nettyRequest = nettyRequest;
         this.jaxrsHeaders =
                 ServiceUtils.toHeaders(ServiceUtils.toMultimap(nettyRequest));
-        this.jaxrsUriInfo = ServiceUtils.toUriInfo(nettyRequest);
+        this.jaxrsUriInfo = (ResteasyUriInfo) ServiceUtils.toUriInfo(nettyRequest);
         this.attributeMap = Maps.newHashMap();
         this.overrideStream = null;
         this.underlyingStream =
@@ -63,6 +67,41 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     }
 
     @Override
+    public Enumeration<String> getAttributeNames() {
+        return null;
+    }
+
+    @Override
+    public ResteasyAsynchronousContext getAsyncContext() {
+        return new ResteasyAsynchronousContext() {
+            @Override
+            public boolean isSuspended() {
+                return false;
+            }
+
+            @Override
+            public ResteasyAsynchronousResponse getAsyncResponse() {
+                return null;
+            }
+
+            @Override
+            public ResteasyAsynchronousResponse suspend() throws IllegalStateException {
+                return null;
+            }
+
+            @Override
+            public ResteasyAsynchronousResponse suspend(long millis) throws IllegalStateException {
+                return null;
+            }
+
+            @Override
+            public ResteasyAsynchronousResponse suspend(long time, TimeUnit unit) throws IllegalStateException {
+                return null;
+            }
+        };
+    }
+
+    @Override
     public void setAttribute(String name, Object value) {
         Preconditions.checkNotNull(name, "name");
         this.attributeMap.put(name, value);
@@ -74,8 +113,28 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     }
 
     @Override
+    public void setHttpMethod(String method) {
+
+    }
+
+    @Override
+    public void setRequestUri(URI requestUri) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void setRequestUri(URI baseUri, URI requestUri) throws IllegalStateException {
+
+    }
+
+    @Override
     public HttpHeaders getHttpHeaders() {
         return this.jaxrsHeaders;
+    }
+
+    @Override
+    public MultivaluedMap<String, String> getMutableHeaders() {
+        return null;
     }
 
     @Override
@@ -91,6 +150,11 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     @Override
     public void setInputStream(InputStream stream) {
         this.overrideStream = stream;
+    }
+
+    @Override
+    public ResteasyUriInfo getUri() {
+        return jaxrsUriInfo;
     }
 
     @Override
@@ -121,52 +185,20 @@ public class InboundServiceRequest implements org.jboss.resteasy.spi.HttpRequest
     }
 
     @Override
-    public UriInfo getUri() {
-        return this.jaxrsUriInfo;
-    }
-
-    @Override
-    public String getPreprocessedPath() {
-        return this.preProcessedPath;
-    }
-
-    @Override
-    public void setPreprocessedPath(String path) {
-        this.preProcessedPath = path;
-    }
-
-    /**
-     * @throws UnsupportedOperationException (Resteasy async is not supported)
-     */
-    @Override
-    public AsynchronousResponse createAsynchronousResponse(long suspendTimeout) {
-        throw new UnsupportedOperationException("createAsynchronousResponse");
-    }
-
-    /**
-     * @throws UnsupportedOperationException (Resteasy async is not supported)
-     */
-    @Override
-    public AsynchronousResponse getAsynchronousResponse() {
-        throw new UnsupportedOperationException("getAsynchronousResponse");
-    }
-
-    @Override
-    public void initialRequestThreadFinished() {
-        // no-op for now
-    }
-
-    @Override
-    public boolean isSuspended() {
-        // no-op for now
-        return false;
-    }
-
-    @Override
     public boolean isInitial() {
         // true indicates that this is a regular request being handled for
         // the first time (as opposed to an asynchronous request being re-sent
         // through the stack)
         return true;
+    }
+
+    @Override
+    public void forward(String path) {
+
+    }
+
+    @Override
+    public boolean wasForwarded() {
+        return false;
     }
 }

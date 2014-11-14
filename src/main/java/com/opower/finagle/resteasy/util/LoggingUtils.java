@@ -1,6 +1,6 @@
 package com.opower.finagle.resteasy.util;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 /**
  * Wraps the Commons Logging API with varags
@@ -11,7 +11,7 @@ public final class LoggingUtils {
 
     private LoggingUtils() { }
 
-    public static void debug(Log log, Throwable throwable,
+    public static void debug(Logger log, Throwable throwable,
                              String message, Object... args) {
         if (message == null) {
             throw new IllegalArgumentException("Cannot format null message");
@@ -21,7 +21,7 @@ public final class LoggingUtils {
         }
     }
 
-    public static void debug(Log log, String message, Object... args) {
+    public static void debug(Logger log, String message, Object... args) {
         if (message == null) {
             throw new IllegalArgumentException("Cannot format null message");
         }
@@ -30,7 +30,7 @@ public final class LoggingUtils {
         }
     }
 
-    public static void info(Log log, Throwable throwable,
+    public static void info(Logger log, Throwable throwable,
                             String message, Object... args) {
         if (message == null) {
             throw new IllegalArgumentException("Cannot format null message");
@@ -40,7 +40,7 @@ public final class LoggingUtils {
         }
     }
 
-    public static void info(Log log, String message, Object... args) {
+    public static void info(Logger log, String message, Object... args) {
         if (message == null) {
             throw new IllegalArgumentException("Cannot format null message");
         }

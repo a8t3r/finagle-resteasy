@@ -2,6 +2,9 @@ package com.opower.finagle.resteasy.example;
 
 import com.opower.finagle.resteasy.client.ResteasyClientBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Example of creating a client
  *
@@ -17,8 +20,21 @@ public final class ExampleClient {
                 .withHttpClient("localhost", 10000)
                 .build(ExampleService.class);
 
-        System.out.println(service.getGreeting());
+        int count = 100;
+        Model model = new Model();
+        model.setName("slavik");
+        model.setAge(count);
+        List<Model> friends = new ArrayList<Model>();
+        model.setFriends(friends);
 
+        while (count -- > 0) {
+            Model friend = new Model();
+            friend.setName("slavik" + Integer.toString(count));
+            friend.setAge(count);
+            friends.add(friend);
+
+            System.out.println(service.getGreeting("gosha", model));
+        }
     }
 
 }

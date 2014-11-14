@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.specimpl.UriBuilderImpl;
+import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.junit.Test;
 
@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.MessageBodyWriter;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -21,14 +20,12 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static com.opower.finagle.resteasy.AssertionHelpers.assertContentEquals;
+import static com.opower.finagle.resteasy.AssertionHelpers.assertHeadersEqual;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.jboss.resteasy.util.HttpHeaderNames.ACCEPT;
-import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_LENGTH;
-import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
+import static org.jboss.resteasy.util.HttpHeaderNames.*;
 import static org.junit.Assert.assertEquals;
-import static com.opower.finagle.resteasy.AssertionHelpers.assertHeadersEqual;
-import static com.opower.finagle.resteasy.AssertionHelpers.assertContentEquals;
 
 /**
  * Tests Resteasy-to-Netty translation
@@ -58,7 +55,7 @@ public class TestOutboundClientRequest {
     @Test
     public void testGetWithQueryParameters() throws Exception {
 
-        UriBuilder builder = new UriBuilderImpl()
+        UriBuilder builder = new ResteasyUriBuilder()
                 .path("/foo/bar")
                 .queryParam("k1", "v1")
                 .queryParam("k2", "v2a", "v2b")
@@ -126,13 +123,13 @@ public class TestOutboundClientRequest {
 
         MessageBodyWriter writer = new CustomWriter();
         ResteasyProviderFactory factory = new ResteasyProviderFactory();
-        factory.addMessageBodyWriter(writer);
+        factory.register(writer);
 
         String suppliedContent = UUID.randomUUID().toString();
         byte [] expectedContent = writer.toString().getBytes();
 
         ClientRequest resteasyRequest = new ClientRequest(
-                new UriBuilderImpl().path("/foo/bar"),
+                new ResteasyUriBuilder().path("/foo/bar"),
                 ClientRequest.getDefaultExecutor(),
                 factory);
         resteasyRequest.setHttpMethod("POST");

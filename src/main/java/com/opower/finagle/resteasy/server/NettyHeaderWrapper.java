@@ -41,6 +41,26 @@ public class NettyHeaderWrapper implements MultivaluedMap<String,Object> {
     }
 
     @Override
+    public void addAll(String key, Object... newValues) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addAll(String key, List<Object> valueList) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addFirst(String key, Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean equalsIgnoreValueOrder(MultivaluedMap<String, Object> otherMap) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int size() {
         return nettyResponse.getHeaderNames().size();
     }

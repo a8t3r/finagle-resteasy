@@ -8,7 +8,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.UriBuilderImpl;
+import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import javax.ws.rs.core.UriBuilder;
@@ -45,7 +45,8 @@ public class FinagleBasedClientExecutor implements ClientExecutor {
 
     @Override
     public ClientRequest createRequest(String uriTemplate) {
-        return createRequest(new UriBuilderImpl().uriTemplate(uriTemplate));
+        UriBuilder builder = new ResteasyUriBuilder().uri(uriTemplate);
+        return createRequest(builder);
     }
 
     @Override

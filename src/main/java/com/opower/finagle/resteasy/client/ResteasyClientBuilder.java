@@ -3,29 +3,22 @@ package com.opower.finagle.resteasy.client;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.opower.finagle.resteasy.util.ServiceUtils;
-import com.twitter.common.quantity.Amount;
-import com.twitter.common.quantity.Time;
-import com.twitter.common.zookeeper.ServerSet;
-import com.twitter.common.zookeeper.ServerSetImpl;
-import com.twitter.common.zookeeper.ZooKeeperClient;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.http.Http;
-import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.opower.finagle.resteasy.util.LoggingUtils.info;
-import static com.twitter.common.quantity.Time.SECONDS;
 
 /**
  * Fluent-style builder for clients that wrap a Finagle client with an
@@ -42,13 +35,7 @@ public class ResteasyClientBuilder {
      */
     public static final int DEFAULT_HOST_CONNECTIONS = 1;
 
-    /**
-     * Default timeout for Zookeeper connections
-     */
-    public static final Amount<Integer,Time> DEFAULT_ZK_TIMEOUT =
-            Amount.of(1, SECONDS);
-
-    private static final Log LOG = LogFactory.getLog(ResteasyClientBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResteasyClientBuilder.class);
 
     /*
      * Resteasy insists on having a real endpoint URL.  Since we're handling
@@ -120,14 +107,12 @@ public class ResteasyClientBuilder {
         Preconditions.checkNotNull(zkLocator, "zkLocator");
         info(LOG, "new Zookeeper client for %s:%s", zkHost, zkPort, zkLocator);
         InetSocketAddress addr = new InetSocketAddress(zkHost, zkPort);
-        ServerSet serverSet = new ServerSetImpl(
-                new ZooKeeperClient(DEFAULT_ZK_TIMEOUT, addr),
-                zkLocator);
+
         ClientBuilder builder = ClientBuilder
                 .get()
                 .codec(Http.get())
-                .hostConnectionLimit(DEFAULT_HOST_CONNECTIONS)
-                .cluster(new ZookeeperServerSetCluster(serverSet));
+                .hostConnectionLimit(DEFAULT_HOST_CONNECTIONS);
+
         return withClientBuilder(builder);
     }
 
